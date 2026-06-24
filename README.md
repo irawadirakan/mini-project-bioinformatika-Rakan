@@ -47,58 +47,140 @@ Proyek ini menguji 3 buah sekuens pendek yang merepresentasikan variasi genomik 
 
 Note: maksimal 3 file FASTA
 
-## ini merupakan kode dan pembahasan kode per bait nya
-
-# Import library bawaan Google Colab untuk upload file
-from google.colab import files
-
-# STEP 2: Inisialisasi List untuk Menyimpan Data
-list_sekuens = []
-# STEP 1: Memunculkan Tombol Upload File FASTA
-print("Silahkan klik tombol di bawah untuk mengupload file FASTA kamu:")
-uploaded = files.upload()  # Kode ini akan memunculkan tombol 'Choose Files'
-
-# Mengambil nama file yang baru saja di-upload secara otomatis
-for nama_file in uploaded.keys():
-    print(f"\n[INFO] Berhasil mengupload file: {nama_file}")
+      import csv
+      import matplotlib.pyplot as plt
+      from google.colab import files
+      
+      # ==============================================================================
+      # STEP 1 & 2: Upload 3 File Berbeda & Masukkan ke dalam List
+      # ==============================================================================
+      list_sekuens = []
+      jumlah_file = 3
+      
+      print(f"--- PROSES UPLOAD {jumlah_file} FILE FASTA ---")
+      
+      for i in range(1, jumlah_file + 1):
+          print(f"\n[UPLOAD] Silahkan klik tombol di bawah untuk file ke-{i}:")
+          uploaded = files.upload() # Memunculkan tombol upload
     
-    # Membaca isi file yang didecode menjadi text (string)
-    isi_file = uploaded[nama_file].decode("utf-8").splitlines()
-    
-    header = ""
-    sekuens_isi = []
-    
-    for baris in isi_file:
-        baris = baris.strip() # Menghilangkan spasi/enter di ujung baris
+    for nama_file in uploaded.keys():
+        print(f"-> Berhasil membaca: {nama_file}")
         
-        if not baris:
-            continue # Skip jika ada baris kosong
+        # Decode data biner menjadi teks per baris
+        isi_file = uploaded[nama_file].decode("utf-8").splitlines()
+        
+        header = ""
+        sekuens_isi = []
+        
+        for baris in isi_file:
+            baris = baris.strip()
+            if not baris:
+                continue
             
-        if baris.startswith(">"):
-            # Jika sebelum baris ini sudah ada sekuens yang dibaca, simpan dulu ke list
-            if header and sekuens_isi:
-                sekuens_penuh = "".join(sekuens_isi)
-                list_sekuens.append((header, sekuens_penuh))
-            
-            # Catat header yang baru
-            header = baris
-            sekuens_isi = [] # Reset penampung sekuens untuk header baru
-        else:
-            # Jika bukan header, berarti ini baris sekuens nukleotida
-            sekuens_isi.append(baris.upper())
-            
-    # Jangan lupa simpan sekuens terakhir setelah loop selesai
-    if header and sekuens_isi:
-        sekuens_penuh = "".join(sekuens_isi)
-        list_sekuens.append((header, sekuens_penuh))
+            if baris.startswith(">"):
+                if header and sekuens_isi:
+                    sekuens_penuh = "".join(sekuens_isi)
+                    list_sekuens.append((header, sekuens_penuh))
+                header = baris
+                sekuens_isi = []
+            else:
+                sekuens_isi.append(baris.upper())
+                
+        if header and sekuens_isi:
+            sekuens_penuh = "".join(sekuens_isi)
+            list_sekuens.append((header, sekuens_penuh))
 
-# Cek Isi List (Menampilkan Hasil)
-print(f"\n[INFO] Jumlah sekuens yang tersimpan di dalam List: {len(list_sekuens)}\n")
+      print("\n" + "="*60)
+      print(f"[SUKSES] Semua file terbaca. Total sekuens di List: {len(list_sekuens)}")
+      print("="*60 + "\n")
+      
+      
+      # ==============================================================================
+      # STEP 3 & 4: Hitung Frekuensi (Dictionary) & Hitung GC Content
+      # ==============================================================================
+      hasil_analisis = []
+      
+      for header, seq in list_sekuens:
+          # Menggunakan Dictionary untuk menghitung frekuensi (STEP 3)
+          frekuensi = {'A': 0, 'T': 0, 'C': 0, 'G': 0}
+          for nukleotida in seq:
+              if nukleotida in frekuensi:
+                  frekuensi[nukleotida] += 1
+            
+    # Hitung GC Content
+    total_g_c = frekuensi['G'] + frekuensi['C']
+    total_basa = len(seq)
+    gc_content = (total_g_c / total_basa) * 100 if total_basa > 0 else 0
+    
+    hasil_analisis.append({
+        'Header': header,
+        'Sekuens': seq,
+        'Frekuensi': frekuensi,
+        'GC_Content': gc_content
+    })
 
-for i, data in enumerate(list_sekuens, 1):
-    id_sekuens, seq = data
-    print(f"--- Sekuens Ke-{i} ---")
-    print(f"Header : {id_sekuens}")
-    print(f"Panjang: {len(seq)} bp")
-    print(f"Isi (50 basa pertama): {seq[:50]}...") 
-    print("-" * 20)
+
+      # ==============================================================================
+      # STEP 4 & 5: Urutkan Berdasarkan GC Content & Tampilkan 3 Terbaik
+      # ==============================================================================
+      # Sorting descending berdasarkan nilai GC_Content
+      hasil_terurut = sorted(hasil_analisis, key=lambda x: x['GC_Content'], reverse=True)
+      
+      print("=" * 60)
+      print("           3 SEKUENS TERBAIK (GC CONTENT TERTINGGI)           ")
+      print("=" * 60)
+      
+      top_3 = hasil_terurut[:3]
+      for idx, data in enumerate(top_3, 1):
+          print(f"Peringkat {idx}:")
+          print(f"  Header    : {data['Header'][:80]}...") # Potong judul biar rapi di terminal
+          print(f"  GC Content: {data['GC_Content']:.2f}%")
+          print(f"  Frekuensi : {data['Frekuensi']}")
+          print("-" * 60)
+      
+      
+      # ==============================================================================
+      # STEP 6: Visualisasi Grafik Batang (Bar Chart)
+      # ==============================================================================
+      # Mengambil ID pendek aksesi untuk label grafik (misal mengambil kata pertama setelah '>')
+      nama_plot = [data['Header'].split()[0].replace('>', '') for data in hasil_terurut]
+      nilai_gc = [data['GC_Content'] for data in hasil_terurut]
+      
+      plt.figure(figsize=(8, 5))
+      bars = plt.bar(nama_plot, nilai_gc, color=['#008080', '#20b2aa', '#48d1cc'], edgecolor='black', width=0.5)
+      
+      plt.title('Perbandingan Nilai GC Content 3 Sekuens', fontsize=12, fontweight='bold')
+      plt.xlabel('ID Aksesi Sekuens (NCBI)', fontsize=10)
+      plt.ylabel('GC Content (%)', fontsize=10)
+      plt.ylim(0, 100)
+      
+      for bar in bars:
+          yval = bar.get_height()
+          plt.text(bar.get_x() + bar.get_width()/2, yval + 2, f"{yval:.2f}%", ha='center', va='bottom', fontweight='bold')
+      
+      plt.tight_layout()
+      plt.show()
+      
+      
+      # ==============================================================================
+      # STEP 7: Menuliskan Hasil Akhir ke File CSV
+      # ==============================================================================
+      nama_file_csv = "hasil_analisis_3_sekuens.csv"
+      
+      with open(nama_file_csv, mode='w', newline='', encoding='utf-8') as csv_file:
+          fieldnames = ['Header', 'Panjang_Basa', 'A', 'T', 'C', 'G', 'GC_Content(%)']
+          writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    
+    writer.writeheader()
+    for data in hasil_terurut:
+        writer.writerow({
+            'Header': data['Header'],
+            'Panjang_Basa': len(data['Sekuens']),
+            'A': data['Frekuensi']['A'],
+            'T': data['Frekuensi']['T'],
+            'C': data['Frekuensi']['C'],
+            'G': data['Frekuensi']['G'],
+            'GC_Content(%)': round(data['GC_Content'], 2)
+        })
+
+      print(f"\n[INFO] File output CSV berhasil dibuat: '{nama_file_csv}'")
