@@ -46,3 +46,66 @@ Proyek ini menguji 3 buah sekuens pendek yang merepresentasikan variasi genomik 
 4. Program akan langsung mengeluarkan hasil *printout* peringkat di terminal, menampilkan grafik visual, dan membuat file CSV otomatis di direktori penyimpanan sementara Colab.
 
 Note: maksimal 3 file FASTA
+
+## ini merupakan kode dan pembahasan kode per bait nya
+
+# Import library bawaan Google Colab untuk upload file
+from google.colab import files
+
+# ==========================================
+# STEP 2: Inisialisasi List untuk Menyimpan Data
+# ==========================================
+list_sekuens = []
+
+# ==========================================
+# STEP 1: Memunculkan Tombol Upload File FASTA
+# ==========================================
+print("Silahkan klik tombol di bawah untuk mengupload file FASTA kamu:")
+uploaded = files.upload()  # Kode ini akan memunculkan tombol 'Choose Files'
+
+# Mengambil nama file yang baru saja di-upload secara otomatis
+for nama_file in uploaded.keys():
+    print(f"\n[INFO] Berhasil mengupload file: {nama_file}")
+    
+    # Membaca isi file yang didecode menjadi text (string)
+    isi_file = uploaded[nama_file].decode("utf-8").splitlines()
+    
+    header = ""
+    sekuens_isi = []
+    
+    for baris in isi_file:
+        baris = baris.strip() # Menghilangkan spasi/enter di ujung baris
+        
+        if not baris:
+            continue # Skip jika ada baris kosong
+            
+        if baris.startswith(">"):
+            # Jika sebelum baris ini sudah ada sekuens yang dibaca, simpan dulu ke list
+            if header and sekuens_isi:
+                sekuens_penuh = "".join(sekuens_isi)
+                list_sekuens.append((header, sekuens_penuh))
+            
+            # Catat header yang baru
+            header = baris
+            sekuens_isi = [] # Reset penampung sekuens untuk header baru
+        else:
+            # Jika bukan header, berarti ini baris sekuens nukleotida
+            sekuens_isi.append(baris.upper())
+            
+    # Jangan lupa simpan sekuens terakhir setelah loop selesai
+    if header and sekuens_isi:
+        sekuens_penuh = "".join(sekuens_isi)
+        list_sekuens.append((header, sekuens_penuh))
+
+# ==========================================
+# Cek Isi List (Menampilkan Hasil)
+# ==========================================
+print(f"\n[INFO] Jumlah sekuens yang tersimpan di dalam List: {len(list_sekuens)}\n")
+
+for i, data in enumerate(list_sekuens, 1):
+    id_sekuens, seq = data
+    print(f"--- Sekuens Ke-{i} ---")
+    print(f"Header : {id_sekuens}")
+    print(f"Panjang: {len(seq)} bp")
+    print(f"Isi (50 basa pertama): {seq[:50]}...") 
+    print("-" * 20)
