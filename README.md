@@ -44,3 +44,5 @@ Proyek ini menguji 3 buah sekuens pendek yang merepresentasikan variasi genomik 
 2. Jalankan cell kode program utama.
 3. Saat program memunculkan tombol *Choose Files*, unggah file `.fasta` satu per satu sesuai instruksi di layar.
 4. Program akan langsung mengeluarkan hasil *printout* peringkat di terminal, menampilkan grafik visual, dan membuat file CSV otomatis di direktori penyimpanan sementara Colab.
+
+Note: maksimal 3 file FASTA
