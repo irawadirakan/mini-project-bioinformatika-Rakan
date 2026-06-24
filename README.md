@@ -52,14 +52,9 @@ Note: maksimal 3 file FASTA
 # Import library bawaan Google Colab untuk upload file
 from google.colab import files
 
-# ==========================================
 # STEP 2: Inisialisasi List untuk Menyimpan Data
-# ==========================================
 list_sekuens = []
-
-# ==========================================
 # STEP 1: Memunculkan Tombol Upload File FASTA
-# ==========================================
 print("Silahkan klik tombol di bawah untuk mengupload file FASTA kamu:")
 uploaded = files.upload()  # Kode ini akan memunculkan tombol 'Choose Files'
 
@@ -97,9 +92,7 @@ for nama_file in uploaded.keys():
         sekuens_penuh = "".join(sekuens_isi)
         list_sekuens.append((header, sekuens_penuh))
 
-# ==========================================
 # Cek Isi List (Menampilkan Hasil)
-# ==========================================
 print(f"\n[INFO] Jumlah sekuens yang tersimpan di dalam List: {len(list_sekuens)}\n")
 
 for i, data in enumerate(list_sekuens, 1):
